@@ -9,6 +9,11 @@ function defaultLogCallback(curlResult, err) {
   }
 }
 
+export const generateCurlCommand = (req) => {
+  const curl = new CurlHelper(req);
+  return curl.generateCommand();
+}
+
 export default (instance, callback = defaultLogCallback) => {
   instance.interceptors.request.use((req) => {
     try {
