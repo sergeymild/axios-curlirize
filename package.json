@@ -1,49 +1,46 @@
 {
   "name": "axios-curlirize",
-  "version": "1.3.10",
-  "description": "Axios third-party module to print all axios requests as curl commands in the console. This repository is forked from axios-curlirize <https://www.npmjs.com/package/axios-curlirize> and supports use with Node JS without having to enable ES6 imports. This repo was inspired by an issue <https://github.com/delirius325/axios-curlirize/issues/20> raised on the origional repository <https://github.com/delirius325/axios-curlirize>. Special thanks to Anthony Gauthier <https://github.com/delirius325>, the author of axios-curlirize",
-  "main": "src/main.js",
-  "type": "module",
+  "version": "1.4.0",
+  "description": "Axios third-party module to print all axios requests as curl commands in the console.",
+  "main": "src/main.ts",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha --recursive --exit tests/**/*.spec.js*"
+    "test2": "mocha -r ts-node/register 'tests/**/*.spec*.ts'"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/delirius325/axios-curlirize.git"
+    "url": "https://github.com/sergeymild/axios-curlirize.git"
   },
   "keywords": [
     "axios",
     "curl",
     "debug"
   ],
-  "author": "delirius325",
+  "author": "sergeymild",
   "contributors": [
     {
-      "name": "Justin \"jayceekay\"",
-      "url": "https://github.com/jayceekay"
+      "name": "Sergey \"Mild\"",
+      "url": "https://github.com/sergeymild"
     },
-    {
-      "name": "Peter \"binggg\" Zhao",
-      "url": "https://github.com/binggg"
-    },
-    {
-      "name": "Abhishek Rajeshirke <arajeshirke79@gmail.com>",
-      "url": "https://github.com/colidarity"
-    }
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/delirius325/axios-curlirize/issues"
+    "url": "https://github.com/sergeymild/axios-curlirize/issues"
   },
-  "homepage": "https://github.com/delirius325/axios-curlirize#readme",
+  "homepage": "https://github.com/sergeymild/#readme",
   "dependencies": {
   },
   "devDependencies": {
     "axios": ">=0.21.1",
     "eslint": "^7.29.0",
-    "expect": "^27.0.6",
+    "@fantasticfiasco/expect": "^1.1.0",
     "express": "^4.17.1",
     "mocha": "^9.0.1",
-    "qs": "^6.9.4"
+    "qs": "^6.9.4",
+    "@types/qs": "^6.9.4",
+    "typescript": "^4.5.5",
+    "@types/mocha": "^9.1.0",
+    "ts-node": "^10.4.0",
+    "chai": "^4.3.6",
+    "@types/chai": "^4.3.0"
   }
 }

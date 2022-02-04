@@ -1,5 +1,9 @@
+import type {AxiosRequestConfig} from "axios";
+
+const commonHeaders = ["common", "delete", "get", "head", "patch", "post", "put"]
 export class CurlHelper {
-  constructor(config) {
+  private request: AxiosRequestConfig;
+  constructor(config: AxiosRequestConfig) {
     this.request = config;
   }
 
@@ -8,17 +12,13 @@ export class CurlHelper {
       curlHeaders = "";
 
     // get the headers concerning the appropriate method (defined in the global axios instance)
-    if (headers.hasOwnProperty("common")) {
+    if (headers.hasOwnProperty("common") && this.request.method) {
       headers = this.request.headers[this.request.method];
     }
 
     // add any custom headers (defined upon calling methods like .get(), .post(), etc.)
     for(let property in this.request.headers) {
-      if (
-        !["common", "delete", "get", "head", "patch", "post", "put"].includes(
-          property
-        )
-      ) {
+      if (!commonHeaders.includes(property)) {
         headers[property] = this.request.headers[property];
       }
     }
@@ -34,7 +34,7 @@ export class CurlHelper {
   }
 
   getMethod() {
-    return `-X ${this.request.method.toUpperCase()}`;
+    return `-X ${(this.request.method ?? "UNKNOWN").toUpperCase()}`;
   }
 
   getBody() {
@@ -42,7 +42,7 @@ export class CurlHelper {
       typeof this.request.data !== "undefined" &&
       this.request.data !== "" &&
       this.request.data !== null &&
-      this.request.method.toUpperCase() !== "GET"
+      (this.request.method ?? "UNKNOWN").toUpperCase() !== "GET"
     ) {
       let data =
         typeof this.request.data === "object" ||
@@ -55,7 +55,7 @@ export class CurlHelper {
     }
   }
 
-  getUrl() {
+  getUrl(): string | undefined {
     if (this.request.baseURL) {
       let baseUrl = this.request.baseURL
       let url = this.request.url
@@ -98,7 +98,7 @@ export class CurlHelper {
       url += this.getQueryString();
     }
 
-    return url.trim();
+    return (url ?? "UNKNOWN_URL").trim();
   }
 
   generateCommand() {
