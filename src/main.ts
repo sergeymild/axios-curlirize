@@ -1,5 +1,6 @@
 import { CurlHelper } from "./lib/CurlHelper";
 import type {AxiosInstance, AxiosRequestConfig} from "axios";
+import {config} from "chai";
 
 export const generateCurlCommand = (req: AxiosRequestConfig) => {
   const curl = new CurlHelper(req);
@@ -12,6 +13,13 @@ export const logAxiosResponse = (params: {
   measureRequest: boolean,
   logger?: (message?: any, ...optionalParams: any[]) => void,
 }) => {
+  if (requestMeasure) {
+    params.axiosInstance.interceptors.request.use((config) => {
+      const url = config.url || config.baseURL;
+      requestMeasure.set(url, Date.now())
+      return config
+    })
+  }
   params.axiosInstance.interceptors.response.use((config) => {
     const url = config.config.url || config.config.baseURL;
     let requestTime;
@@ -44,9 +52,8 @@ export const logAxiosResponse = (params: {
 
 export const AXIOS_TIME_OUT_ERROR_KEY = "AXIOS_TIME_OUT_ERROR_KEY"
 export const logAxiosReject = (params: {
-  instance: AxiosInstance,
   logger?: (message?: any, ...optionalParams: any[]) => void,
-  on401?: () => void
+  on401?: (url: string) => void
 }) => {
   return (error: any) => {
     if (typeof error === 'string') {
@@ -67,7 +74,8 @@ export const logAxiosReject = (params: {
         const statusText = config.statusText;
         const data = config.data;
         if (config === 401 && params.on401) {
-          params.on401()
+          logger(`[REQUEST.ERROR.RESPONSE.FIRST.CHECK.401]`)
+          params.on401(config.url)
           throw error;
         }
         logger(
@@ -79,6 +87,11 @@ export const logAxiosReject = (params: {
           })}`,
         );
       }
+    }
+
+    if ('response' in error && error?.response?.status === 401 && params.on401) {
+      logger(`[REQUEST.ERROR.RESPONSE.LAST.CHECK.401]`)
+      params.on401(error.config.url)
     }
 
     throw error;
