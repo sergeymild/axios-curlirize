@@ -13,19 +13,16 @@ export const logAxiosResponse = (params: {
   on401: ON_401,
   logger?: (message?: any, ...optionalParams: any[]) => void,
 }) => {
-  if (requestMeasure) {
-    params.axiosInstance.interceptors.request.use((config) => {
-      console.log('[Axios.request.request]', )
-      // @ts-ignore
-      const logger = params.logger ?? console.log
-      logger('[REQUEST]', generateCurlCommand(config));
-      const url = config.url || config.baseURL;
-      requestMeasure.set(url, Date.now())
-      return config
-    }, logAxiosReject({logger: params.logger, on401: params.on401}))
-  }
+  params.axiosInstance.interceptors.request.use((config) => {
+    // @ts-ignore
+    const logger = params.logger ?? console.log
+    logger('[REQUEST]', generateCurlCommand(config));
+    const url = config.url || config.baseURL;
+    requestMeasure.set(url, Date.now())
+    return config
+  }, logAxiosReject({logger: params.logger, on401: params.on401}))
+  
   params.axiosInstance.interceptors.response.use((config) => {
-    console.log('[Axios.request.response]', )
     const url = config.config.url || config.config.baseURL;
     let requestTime;
     const start = requestMeasure.get(url);
@@ -57,7 +54,6 @@ export const logAxiosReject = (params: {
   on401?: (url: string) => void
 }) => {
   return (error: any) => {
-    console.log('[Main.]', typeof error, error)
     if (typeof error === 'string') {
       throw new Error(error);
     }
