@@ -10,7 +10,7 @@ type ON_401 = (url: string) => void
 const requestMeasure = new Map();
 export const logAxiosResponse = (params: {
   axiosInstance: AxiosInstance,
-  on401: ON_401,
+  on401?: ON_401,
   logger?: (message?: any, ...optionalParams: any[]) => void,
 }) => {
   params.axiosInstance.interceptors.request.use((config) => {
@@ -18,8 +18,9 @@ export const logAxiosResponse = (params: {
     requestMeasure.set(url, Date.now())
     return config
   }, logAxiosReject({logger: params.logger, on401: params.on401}))
-  
+
   params.axiosInstance.interceptors.response.use((config) => {
+    const absoluteUrl = config.config.baseURL ? `${config.config.baseURL}/${config.config.url}` : config.config.url
     const url = config.config.url || config.config.baseURL;
     let requestTime;
     const start = requestMeasure.get(url);
@@ -32,7 +33,7 @@ export const logAxiosResponse = (params: {
     logger(
       '[RESPONSE]',
       JSON.stringify({
-        url: `${config.config.baseURL}/${config.config.url}`,
+        url: absoluteUrl,
         method: config.config.method,
         status: config.status,
         tookTime: requestTime,
@@ -48,7 +49,7 @@ export const logAxiosResponse = (params: {
 export const AXIOS_TIME_OUT_ERROR_KEY = "AXIOS_TIME_OUT_ERROR_KEY"
 export const logAxiosReject = (params: {
   logger?: (message?: any, ...optionalParams: any[]) => void,
-  on401?: (url: string) => void
+  on401?: ON_401
 }) => {
   return (error: any) => {
     if (typeof error === 'string') {
