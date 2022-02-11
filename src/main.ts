@@ -14,9 +14,6 @@ export const logAxiosResponse = (params: {
   logger?: (message?: any, ...optionalParams: any[]) => void,
 }) => {
   params.axiosInstance.interceptors.request.use((config) => {
-    // @ts-ignore
-    const logger = params.logger ?? console.log
-    logger('[REQUEST]', generateCurlCommand(config));
     const url = config.url || config.baseURL;
     requestMeasure.set(url, Date.now())
     return config
