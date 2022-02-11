@@ -12,13 +12,16 @@ export class CurlHelper {
       curlHeaders = "";
 
     // get the headers concerning the appropriate method (defined in the global axios instance)
+    //@ts-ignore
     if (headers.hasOwnProperty("common") && this.request.method) {
+      //@ts-ignore
       headers = this.request.headers[this.request.method];
     }
 
     // add any custom headers (defined upon calling methods like .get(), .post(), etc.)
     for(let property in this.request.headers) {
       if (!commonHeaders.includes(property)) {
+        //@ts-ignore
         headers[property] = this.request.headers[property];
       }
     }
