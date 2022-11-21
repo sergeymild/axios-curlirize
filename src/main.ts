@@ -20,7 +20,13 @@ export const logAxiosResponse = (params: {
   }, logAxiosReject({logger: params.logger, on401: params.on401}))
 
   params.axiosInstance.interceptors.response.use((config) => {
-    const absoluteUrl = config.config.baseURL ? `${config.config.baseURL}/${config.config.url}` : config.config.url
+    let baseUrl = config.config.baseURL;
+    if (baseUrl?.endsWith("/") !== true && config.config.url?.startsWith("/") !== true) {
+      baseUrl += "/"
+    }
+    const absoluteUrl = config.config.baseURL
+      ? `${baseUrl}${config.config.url}`
+      : config.config.url
     const url = config.config.url || config.config.baseURL;
     let requestTime;
     const start = requestMeasure.get(url);
