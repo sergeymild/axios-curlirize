@@ -72,8 +72,13 @@ export class CurlHelper {
   }
 
   getQueryString() {
-    if (this.request.paramsSerializer) {
-      const params = this.request.paramsSerializer(this.request.params)
+    if (this.request.paramsSerializer && this.request.params) {
+      let params: any | undefined
+      if ('serialize' in this.request.paramsSerializer) {
+        params = this.request.paramsSerializer.serialize?.(this.request.params, this.request.paramsSerializer)
+      } else if (typeof this.request.paramsSerializer === 'function') {
+        params = this.request.paramsSerializer?.(this.request.params)
+      }
       if (!params || params.length === 0) return ''
       if (params.startsWith('?')) return params
       return `?${params}`

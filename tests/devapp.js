@@ -1,4 +1,4 @@
-import express from "express";
+const express = require('express')
 
 const app = express();
 
@@ -17,5 +17,3 @@ app.post("/api", (req, res) => {
 app.listen(7500, () => {
   console.info("Express dev server listening on port 7500");
 });
-
-export default app;

@@ -1,5 +1,8 @@
 import { CurlHelper } from "./lib/CurlHelper";
-import type {AxiosInstance, AxiosRequestConfig} from "axios";
+import type {
+  AxiosInstance,
+  AxiosRequestConfig
+} from "axios";
 
 export const generateCurlCommand = (req: AxiosRequestConfig) => {
   const curl = new CurlHelper(req);
