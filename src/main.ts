@@ -27,9 +27,7 @@ export const logAxiosResponse = (params: {
     if (baseUrl?.endsWith("/") !== true && config.config.url?.startsWith("/") !== true) {
       baseUrl += "/"
     }
-    const absoluteUrl = config.config.baseURL
-      ? `${baseUrl}${config.config.url}`
-      : config.config.url
+
     const url = config.config.url || config.config.baseURL;
     let requestTime;
     const start = requestMeasure.get(url);
@@ -39,10 +37,11 @@ export const logAxiosResponse = (params: {
     // @ts-ignore
     const logger = params.logger ?? console.log
     logger('[REQUEST]', generateCurlCommand(config.config));
+    const curly = new CurlHelper(config.config)
     logger(
       '[RESPONSE]',
       JSON.stringify({
-        url: absoluteUrl,
+        url: curly.getBuiltURL(),
         method: config.config.method,
         status: config.status,
         tookTime: requestTime,
@@ -61,45 +60,54 @@ export const logAxiosReject = (params: {
   on401?: ON_401
 }) => {
   return (error: any) => {
-    if (typeof error === 'string') {
-      throw new Error(error);
-    }
-
     // @ts-ignore
     const logger = params.logger ?? console.log
-    if ('config' in error) {
-      logger(`[ERROR.REQUEST] ${generateCurlCommand(error.config) ?? 'UNKNOWN_CURL'}`);
-      if ('message' in error && error.message === AXIOS_TIME_OUT_ERROR_KEY) {
-        logger(`[ERROR.RESPONSE] TIMEOUT_ERROR: [${error.request?._url ?? 'unknown'}]`);
-        throw error;
+    if (error.toString().includes("CanceledError: canceled")) {
+      logger(`[ERROR.REQUEST] Cancelled`);
+      throw {response: {status: -1, code: 'canceled'}}
+    }
+    try {
+      if (typeof error === 'string') {
+        throw new Error(error);
       }
-      if ('response' in error) {
-        const config = error.response;
-        const code = config.status;
-        const statusText = config.statusText;
-        const data = config.data;
-        if (config === 401 && params.on401) {
-          logger(`[ERROR.RESPONSE.FIRST.CHECK.401]`)
-          params.on401(config.url)
+
+      if ('config' in error) {
+        logger(`[ERROR.REQUEST] ${generateCurlCommand(error.config) ?? 'UNKNOWN_CURL'}`);
+        if ('message' in error && error.message === AXIOS_TIME_OUT_ERROR_KEY) {
+          logger(`[ERROR.RESPONSE] TIMEOUT_ERROR: [${error.request?._url ?? 'unknown'}]`);
           throw error;
         }
-        logger(
-          `[ERROR.RESPONSE] ${JSON.stringify({
-            code,
-            statusText,
-            data,
-            url: error.request?._url ?? 'unknown',
-          })}`,
-        );
+        if ('response' in error) {
+          const config = error.response;
+          const code = config.status;
+          const statusText = config.statusText;
+          const data = config.data;
+          if (config === 401 && params.on401) {
+            logger(`[ERROR.RESPONSE.FIRST.CHECK.401]`)
+            params.on401(config.url)
+            throw error;
+          }
+          logger(
+            `[ERROR.RESPONSE] ${JSON.stringify({
+              code,
+              statusText,
+              data,
+              url: error.request?._url ?? 'unknown',
+            })}`,
+          );
+        }
       }
-    }
 
-    if ('response' in error && error?.response?.status === 401 && params.on401) {
-      logger(`[ERROR.RESPONSE.LAST.CHECK.401]`)
-      params.on401(error.config.url)
-    }
+      if ('response' in error && error?.response?.status === 401 && params.on401) {
+        logger(`[ERROR.RESPONSE.LAST.CHECK.401]`)
+        params.on401(error.config.url)
+      }
 
-    throw error;
+      throw error;
+    } catch (e) {
+      logger(`[ERROR.RESPONSE.CATCH_ERROR]`, e)
+      throw e
+    }
   }
 }
 
